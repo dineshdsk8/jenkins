@@ -145,4 +145,4 @@ sudo systemctl restart jenkins
 
 Check Jenkins Status
 
-sudo systemctl status jenkins
+sudo systemctl status jenkinsWebhook Test
