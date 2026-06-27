@@ -1,6 +1,10 @@
 pipeline {
-
     agent any
+
+    environment {
+        FLASK_PORT = "6000"
+        EXPRESS_PORT = "4000"
+    }
 
     stages {
 
@@ -11,7 +15,7 @@ pipeline {
         }
 
         /* ---------------- FLASK ---------------- */
-        stage('Install Flask Dependencies') {
+        stage('Setup Flask') {
             steps {
                 dir('flask') {
                     sh '''
@@ -24,56 +28,57 @@ pipeline {
             }
         }
 
-        stage('Restart Flask') {
+        stage('Restart Flask (PM2)') {
             steps {
                 dir('flask') {
                     sh '''
                     pm2 delete flask || true
-                    pm2 start venv/bin/python --name flask -- app.py
+
+                    export FLASK_APP=app.py
+                    export FLASK_RUN_HOST=0.0.0.0
+                    export FLASK_RUN_PORT=6000
+
+                    pm2 start venv/bin/python \
+                        --name flask \
+                        --cwd $(pwd) \
+                        -- -m flask run
                     '''
                 }
             }
         }
 
         /* ---------------- EXPRESS ---------------- */
-        stage('Install Express Dependencies') {
+        stage('Setup Express') {
             steps {
                 dir('express') {
                     sh '''
-                    npm ci || npm install
+                    npm install
                     '''
                 }
             }
         }
 
-        stage('Restart Express') {
+        stage('Restart Express (PM2)') {
             steps {
                 dir('express') {
                     sh '''
                     pm2 delete express || true
-                    pm2 start app.js --name express
+
+                    pm2 start server.js \
+                        --name express \
+                        --cwd $(pwd) \
+                        --env production
                     '''
                 }
             }
         }
-
-        /* ---------------- PM2 SAVE ---------------- */
-        stage('Save PM2 Process List') {
-            steps {
-                sh '''
-                pm2 save
-                '''
-            }
-        }
-
     }
 
     post {
-        success {
-            echo "✅ Deployment Successful"
-        }
-        failure {
-            echo "❌ Deployment Failed"
+        always {
+            sh '''
+            pm2 list
+            '''
         }
     }
 }
