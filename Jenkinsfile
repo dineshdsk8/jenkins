@@ -1,79 +1,74 @@
 pipeline {
     agent any
 
-    environment {
-        FLASK_PORT = "6000"
-        EXPRESS_PORT = "4000"
-    }
-
     stages {
 
+        /* ---------------- CHECKOUT ---------------- */
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        /* ---------------- FLASK ---------------- */
-        stage('Setup Flask') {
+        /* ---------------- FLASK SETUP ---------------- */
+        stage('Setup Flask (python3)') {
             steps {
                 dir('flask') {
                     sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    pip3 install --user --upgrade pip
+                    pip3 install --user flask
+                    pip3 install --user -r requirements.txt
                     '''
                 }
             }
         }
 
-        stage('Restart Flask (PM2)') {
+        /* ---------------- RUN FLASK ---------------- */
+        stage('Run Flask') {
             steps {
                 dir('flask') {
                     sh '''
                     pm2 delete flask || true
 
-                    export FLASK_APP=app.py
-                    export FLASK_RUN_HOST=0.0.0.0
-                    export FLASK_RUN_PORT=6000
-
-                    pm2 start venv/bin/python \
+                    pm2 start app.py \
                         --name flask \
-                        --cwd $(pwd) \
-                        -- -m flask run
+                        --interpreter python3 \
+                        --cwd $(pwd)
                     '''
                 }
             }
         }
 
-        /* ---------------- EXPRESS ---------------- */
+        /* ---------------- EXPRESS SETUP ---------------- */
         stage('Setup Express') {
             steps {
                 dir('express') {
                     sh '''
+                    npm cache clean --force
+                    rm -rf node_modules package-lock.json || true
                     npm install
                     '''
                 }
             }
         }
 
-        stage('Restart Express (PM2)') {
+        /* ---------------- RUN EXPRESS ---------------- */
+        stage('Run Express') {
             steps {
                 dir('express') {
                     sh '''
                     pm2 delete express || true
 
-                    pm2 start server.js \
+                    pm2 start app.js \
                         --name express \
-                        --cwd $(pwd) \
-                        --env production
+                        --cwd $(pwd)
                     '''
                 }
             }
         }
     }
 
+    /* ---------------- STATUS ---------------- */
     post {
         always {
             sh '''
