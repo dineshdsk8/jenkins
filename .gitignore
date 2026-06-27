@@ -1,0 +1,21 @@
+# Python
+flask/venv/
+flask/__pycache__/
+flask/*.pyc
+
+# Node.js
+express/node_modules/
+express/npm-debug.log
+
+# PM2
+.pm2/
+
+# Jenkins
+workspace/
+
+# Git
+.git/
+
+# OS files
+.DS_Store
+Thumbs.db
