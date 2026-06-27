@@ -1,4 +1,4 @@
-CI/CD Pipeline Using Jenkins
+# CI/CD Pipeline Using Jenkins
 
 ## Objective
 
@@ -9,19 +9,33 @@ Automate the deployment of the Flask and Express applications using Jenkins.
 * Jenkins
 * Git
 * GitHub
-* PM2
+* Python
+* Node.js
 
 ## Pipeline Workflow
 
-1. Jenkins pulls the latest code from GitHub.
-2. Installs the required dependencies.
-3. Restarts the applications using PM2.
-4. GitHub webhook automatically triggers the pipeline after every push.
+1. Developer pushes code to GitHub.
+2. GitHub Webhook triggers the Jenkins pipeline.
+3. Jenkins pulls the latest code from the GitHub repository.
+4. Jenkins installs the required dependencies.
+5. Jenkins deploys the latest version of the applications.
+6. Verify that the deployment is successful.
+
+## CI/CD Flow
+
+GitHub → GitHub Webhook → Jenkins → Deploy Application
 
 ## Pipeline Stages
 
 * Checkout Source Code
 * Install Dependencies
 * Deploy Application
-* Restart Services
 * Verify Deployment
+
+## Technologies Used
+
+* Jenkins
+* GitHub
+* GitHub Webhooks
+* Python
+* Node.js
