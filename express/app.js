@@ -12,7 +12,7 @@ app.get("/", async (req, res) => {
         const response = await axios.get(backend);
 
         res.send(`
-            <h1>Hello from Jenkins</h1>
+            <h1>Hello from Jenkins CD</h1>
             <pre>${JSON.stringify(response.data,null,2)}</pre>
         `);
 
