@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     stages {
@@ -9,6 +10,7 @@ pipeline {
             }
         }
 
+        /* ---------------- FLASK ---------------- */
         stage('Install Flask Dependencies') {
             steps {
                 dir('flask') {
@@ -17,16 +19,6 @@ pipeline {
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
-                    '''
-                }
-            }
-        }
-
-        stage('Install Express Dependencies') {
-            steps {
-                dir('express') {
-                    sh '''
-                    npm ci || npm install
                     '''
                 }
             }
@@ -43,6 +35,17 @@ pipeline {
             }
         }
 
+        /* ---------------- EXPRESS ---------------- */
+        stage('Install Express Dependencies') {
+            steps {
+                dir('express') {
+                    sh '''
+                    npm ci || npm install
+                    '''
+                }
+            }
+        }
+
         stage('Restart Express') {
             steps {
                 dir('express') {
@@ -54,19 +57,23 @@ pipeline {
             }
         }
 
-        stage('Save PM2') {
+        /* ---------------- PM2 SAVE ---------------- */
+        stage('Save PM2 Process List') {
             steps {
-                sh 'pm2 save'
+                sh '''
+                pm2 save
+                '''
             }
         }
+
     }
 
     post {
         success {
-            echo "Deployment Successful"
+            echo "✅ Deployment Successful"
         }
         failure {
-            echo "Deployment Failed"
+            echo "❌ Deployment Failed"
         }
     }
 }
